@@ -1,0 +1,25 @@
+version: 2
+
+sources:
+  - name: raw
+    description: "Raw data loaded from ERP API via Python extractor and dlt"
+    schema: raw
+    tables:
+      - name: customers
+        description: "Raw customer records from ERP API"
+      - name: products
+        description: "Raw product records from ERP API"
+      - name: orders
+        description: "Raw order records from ERP API"
+      - name: order_items
+        description: "Raw order item records from ERP API"
+      - name: payments
+        description: "Raw payment records from ERP API"
+      - name: stores
+        description: "Raw store records from ERP API"
+      - name: employees
+        description: "Raw employee records from ERP API"
+      - name: payment_methods
+        description: "Raw payment method records from ERP API"
+      - name: inventory_movements
+        description: "Raw inventory movement records from ERP API"

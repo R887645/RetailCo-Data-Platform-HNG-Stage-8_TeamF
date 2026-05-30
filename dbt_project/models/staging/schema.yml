@@ -1,0 +1,97 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: "Staged customer data from ERP API — cast and renamed"
+    columns:
+      - name: customer_id
+        description: "Unique customer identifier from source"
+        tests:
+          - not_null
+          - unique
+      - name: email
+        description: "Customer email address"
+        tests:
+          - not_null
+      - name: is_deleted
+        description: "Soft delete flag from source"
+        tests:
+          - not_null
+
+  - name: stg_products
+    description: "Staged product data from ERP API — cast and renamed"
+    columns:
+      - name: product_id
+        description: "Unique product identifier from source"
+        tests:
+          - not_null
+          - unique
+      - name: sku
+        description: "Stock keeping unit code"
+        tests:
+          - not_null
+      - name: is_deleted
+        description: "Soft delete flag from source"
+        tests:
+          - not_null
+
+  - name: stg_orders
+    description: "Staged order data from ERP API — cast and renamed"
+    columns:
+      - name: order_id
+        description: "Unique order identifier from source"
+        tests:
+          - not_null
+          - unique
+      - name: customer_id
+        description: "Foreign key to customers"
+        tests:
+          - not_null
+      - name: status
+        description: "Current order status"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['pending', 'paid', 'shipped', 'delivered', 'cancelled']
+
+  - name: stg_order_items
+    description: "Staged order item data from ERP API — cast and renamed"
+    columns:
+      - name: order_item_id
+        description: "Unique order item identifier from source"
+        tests:
+          - not_null
+          - unique
+      - name: order_id
+        description: "Foreign key to orders"
+        tests:
+          - not_null
+      - name: product_id
+        description: "Foreign key to products"
+        tests:
+          - not_null
+      - name: quantity
+        description: "Number of units ordered"
+        tests:
+          - not_null
+
+  - name: stg_inventory_movements
+    description: "Staged inventory movement data from ERP API — cast and renamed"
+    columns:
+      - name: movement_id
+        description: "Unique movement identifier from source"
+        tests:
+          - not_null
+          - unique
+      - name: product_id
+        description: "Foreign key to products"
+        tests:
+          - not_null
+      - name: store_id
+        description: "Foreign key to stores"
+        tests:
+          - not_null
+      - name: quantity
+        description: "Movement quantity — positive for in, negative for out"
+        tests:
+          - not_null
