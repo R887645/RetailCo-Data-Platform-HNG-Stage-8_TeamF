@@ -1,7 +1,7 @@
 services:
 
   postgres-lake:
-    image: postgres:latest
+    image: postgres:15
     container_name: postgres-lake
     environment:
       POSTGRES_USER: lake
