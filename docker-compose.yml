@@ -1,0 +1,39 @@
+services:
+
+  postgres-lake:
+    image: postgres:latest
+    container_name: postgres-lake
+    environment:
+      POSTGRES_USER: lake
+      POSTGRES_PASSWORD: lake
+      POSTGRES_DB: lake
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-lake-data:/var/lib/postgresql/data
+      - ./docker/lake_init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "lake"]
+      interval: 5s
+      retries: 10
+
+  postgres-warehouse:
+    image: postgres:15
+    container_name: postgres-warehouse
+    environment:
+      POSTGRES_USER: warehouse
+      POSTGRES_PASSWORD: warehouse
+      POSTGRES_DB: warehouse
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-warehouse-data:/var/lib/postgresql/data
+      - ./docker/warehouse_init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "warehouse"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  postgres-lake-data:
+  postgres-warehouse-data:
