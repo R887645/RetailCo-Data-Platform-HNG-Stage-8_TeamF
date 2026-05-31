@@ -1,0 +1,69 @@
+x-airflow-common: &airflow-common
+  image: apache/airflow:2.9.0
+  environment:
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow_db/airflow
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
+    _PIP_ADDITIONAL_REQUIREMENTS: 'dlt[postgres] psycopg2-binary python-dotenv dbt-core dbt-postgres'
+  env_file:
+    - ../.env
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ../extractor:/opt/airflow/extractor
+    - ../dlt_pipeline:/opt/airflow/dlt_pipeline
+    - ../dbt_project:/opt/airflow/dbt_project
+    - airflow_logs:/opt/airflow/logs
+  depends_on:
+    airflow_db:
+      condition: service_healthy
+
+services:
+  airflow_db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - airflow_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 5
+
+  airflow_init:
+    <<: *airflow-common
+    command: >
+      bash -c "airflow db migrate &&
+               airflow users create
+               --username admin
+               --firstname Admin
+               --lastname User
+               --role Admin
+               --email admin@retailco.com
+               --password admin"
+    restart: on-failure
+
+  airflow_webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - "8080:8080"
+    restart: always
+
+  airflow_scheduler:
+    <<: *airflow-common
+    command: scheduler
+    restart: always
+
+volumes:
+  airflow_logs:
+  airflow_db_data:
+
+networks:
+  default:
+    external: true
+    name: retailco-pipeline_default
