@@ -1,6 +1,10 @@
 -- fct_inventory_daily.sql
 -- Grain: one row per product per store per day
--- Built by aggregating raw inventory_movements into daily snapshots
+-- Business justification: periodic snapshot fact table built by
+-- aggregating raw inventory_movements into daily stock levels.
+-- There is no pre-aggregated source; this model computes
+-- opening stock, received, sold, and closing stock per day
+-- using window functions over the movements data.
 with movements as (
     select * from {{ ref('stg_inventory_movements') }}
 ),
