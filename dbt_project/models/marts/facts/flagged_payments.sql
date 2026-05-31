@@ -4,6 +4,7 @@
 -- Payments with amount_paid = 0 or unexplained negative amounts
 -- are stored here for investigation by the compliance team.
 -- This is NOT a fact table and does not appear in the bus matrix.
+
 with payments as (
     select * from {{ ref('stg_payments') }}
 ),
