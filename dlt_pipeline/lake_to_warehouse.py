@@ -1,34 +1,34 @@
 """
-RetailCo dlt Pipeline — CP3
-============================
-Reads from Lake Postgres (raw schema)
-Writes to Warehouse Postgres (raw schema)
-
-What dlt handles automatically:
-  - Incremental loading (only moves rows where updated_at > last run)
-  - Type coercion between source and destination
-  - Schema evolution (new columns added automatically)
-  - Idempotent loads via merge on primary key
+RetailCo dlt Pipeline — Checkpoint 3
+Reads from Lake PostgreSQL (raw schema)
+Writes to Warehouse PostgreSQL (raw schema)
 """
 
 from __future__ import annotations
+
 import logging
 import os
-import dlt
-from dlt.sources import DltResource
 from typing import Iterator
+
+import dlt
+import psycopg2
+import psycopg2.extras
 from dotenv import load_dotenv
+from pathlib import Path
 
-load_dotenv()
+load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env", override=True)
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
+
+
+# ── Connection strings ────────────────────────────────────────────────────────
 
 LAKE_CONN      = os.environ["LAKE_CONN"]
 WAREHOUSE_CONN = os.environ["WAREHOUSE_CONN"]
 
-# ── Table configs — one entry per Lake table ──────────────────────────────────
-# cursor_field: column dlt uses to track what's new
-# primary_key:  column used for upsert (no duplicates)
+
+# ── Table configuration ───────────────────────────────────────────────────────
 
 TABLE_CONFIGS = {
     "stores":              {"cursor_field": "source_updated_at", "primary_key": "id"},
@@ -42,72 +42,62 @@ TABLE_CONFIGS = {
     "inventory_movements": {"cursor_field": "source_updated_at", "primary_key": "id"},
 }
 
-# ── Source: reads from Lake ───────────────────────────────────────────────────
+
+# ── Source ────────────────────────────────────────────────────────────────────
 
 @dlt.source(name="lake")
-def lake_source():
+def lake_source() -> list:
     """
-    One dlt resource per table in the Lake.
-    Each resource uses incremental loading on updated_at.
-    dlt remembers the last value and only fetches newer rows next run.
+    Builds one dlt resource per lake table.
+    Each resource loads incrementally using source_updated_at as the cursor.
+    dlt tracks the last value automatically so only new or updated rows
+    are moved on each run.
     """
-    import psycopg2
-    import psycopg2.extras
 
-    resources = []
+    def make_resource(table: str, cursor_field: str, primary_key: str):
 
-    for table_name, config in TABLE_CONFIGS.items():
-        cursor_field = config["cursor_field"]
-        primary_key  = config["primary_key"]
-
-        def make_resource(t=table_name, cf=cursor_field, pk=primary_key):
-
-            @dlt.resource(
-                name=t,
-                primary_key=pk,
-                write_disposition="merge",
+        @dlt.resource(
+            name=table,
+            primary_key=primary_key,
+            write_disposition="merge",
+        )
+        def resource(
+            updated_at=dlt.sources.incremental(
+                cursor_field,
+                initial_value="1970-01-01T00:00:00+00:00"
             )
-            def table_resource(
-                updated_at=dlt.sources.incremental(
-                    cf,
-                    initial_value="1970-01-01T00:00:00+00:00"
-                )
-            ) -> Iterator[dict]:
-                """
-                Yields rows from lake raw.<table> where updated_at > last run.
-                dlt tracks the last value automatically.
-                """
-                conn = psycopg2.connect(LAKE_CONN)
-                try:
-                    with conn.cursor(
-                        cursor_factory=psycopg2.extras.RealDictCursor
-                    ) as cur:
-                        sql = f"""
-                            SELECT *
-                            FROM raw.{t}
-                            WHERE {cf} > %s
-                            ORDER BY {cf} ASC
-                        """
-                        cur.execute(sql, (updated_at.last_value,))
+        ) -> Iterator[dict]:
 
-                        # Fetch in batches of 500 to avoid memory issues
-                        while True:
-                            rows = cur.fetchmany(500)
-                            if not rows:
-                                break
-                            for row in rows:
-                                yield dict(row)
-                finally:
-                    conn.close()
+            conn = psycopg2.connect(LAKE_CONN)
+            try:
+                with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                    cur.execute(
+                        f"""
+                        SELECT *
+                        FROM   raw.{table}
+                        WHERE  {cursor_field} > %s
+                        ORDER  BY {cursor_field} ASC
+                        """,
+                        (updated_at.last_value,)
+                    )
+                    while True:
+                        rows = cur.fetchmany(500)
+                        if not rows:
+                            break
+                        for row in rows:
+                            yield dict(row)
+            finally:
+                conn.close()
 
-            return table_resource
+        return resource
 
-        resources.append(make_resource())
-
-    return resources
+    return [
+        make_resource(table, cfg["cursor_field"], cfg["primary_key"])
+        for table, cfg in TABLE_CONFIGS.items()
+    ]
 
 
-# ── Pipeline definition ───────────────────────────────────────────────────────
+# ── Pipeline ──────────────────────────────────────────────────────────────────
 
 def build_pipeline() -> dlt.Pipeline:
     return dlt.pipeline(
@@ -118,28 +108,24 @@ def build_pipeline() -> dlt.Pipeline:
     )
 
 
-# ── Main function called by Airflow ───────────────────────────────────────────
+# ── Entry point ───────────────────────────────────────────────────────────────
 
 def run_pipeline() -> None:
     """
     Runs the full lake to warehouse load.
-    Called by the Airflow DAG after CP2 extract succeeds.
+    Called by the Airflow DAG after extraction succeeds.
     """
     pipeline  = build_pipeline()
     source    = lake_source()
 
     logger.info("Starting dlt pipeline: lake → warehouse")
     load_info = pipeline.run(source)
-    logger.info("dlt pipeline completed: %s", load_info)
+    logger.info("dlt pipeline complete: %s", load_info)
 
-    # Fail loudly if any jobs failed
     for package in load_info.load_packages:
         for job in package.jobs.get("failed_jobs", []):
             raise RuntimeError(f"dlt job failed: {job}")
 
 
-# ── Local test ────────────────────────────────────────────────────────────────
-
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
     run_pipeline()
