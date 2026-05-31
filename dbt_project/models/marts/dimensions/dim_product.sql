@@ -1,5 +1,9 @@
 -- dim_product.sql
--- SCD2 dimension built from snapshot
+-- Business justification: SCD2 product dimension with surrogate key.
+-- Reads from dim_product_snapshot which tracks all changes to
+-- product price and category over time.
+-- Discontinued products kept with is_current = false so historical
+-- sales facts still resolve correctly with correct price at time of sale.
 with snapshot as (
     select * from {{ ref('dim_product_snapshot') }}
 ),
