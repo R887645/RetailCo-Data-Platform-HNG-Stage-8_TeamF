@@ -22,13 +22,17 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 logger = logging.getLogger(__name__)
 
 
-# ── Connection strings ────────────────────────────────────────────────────────
+# -------------------------------------------------------------------
+# CONNECTIONS
+# -------------------------------------------------------------------
 
 LAKE_CONN      = os.environ["LAKE_CONN"]
 WAREHOUSE_CONN = os.environ["WAREHOUSE_CONN"]
 
 
-# ── Table configuration ───────────────────────────────────────────────────────
+# -------------------------------------------------------------------
+# SOURCE TABLE CONFIGURATION
+# -------------------------------------------------------------------
 
 TABLE_CONFIGS = {
     "stores":              {"cursor_field": "source_updated_at", "primary_key": "id"},
@@ -43,23 +47,29 @@ TABLE_CONFIGS = {
 }
 
 
-# ── Source ────────────────────────────────────────────────────────────────────
+# -------------------------------------------------------------------
+# DLT SOURCE
+# -------------------------------------------------------------------
 
 @dlt.source(name="lake")
-def lake_source() -> list:
-    """
+def lake_source():
+
+ """
     Builds one dlt resource per lake table.
     Each resource loads incrementally using source_updated_at as the cursor.
     dlt tracks the last value automatically so only new or updated rows
     are moved on each run.
     """
-
-    def make_resource(table: str, cursor_field: str, primary_key: str):
+    def build_resource(
+        table_name: str,
+        cursor_field: str,
+        primary_key: str
+    ):
 
         @dlt.resource(
-            name=table,
+            name=table_name,
             primary_key=primary_key,
-            write_disposition="merge",
+            write_disposition="merge"
         )
         def resource(
             updated_at=dlt.sources.incremental(
@@ -68,64 +78,103 @@ def lake_source() -> list:
             )
         ) -> Iterator[dict]:
 
-            conn = psycopg2.connect(LAKE_CONN)
-            try:
-                with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            logger.info(
+                f"Loading raw.{table_name} "
+                f"after {updated_at.last_value}"
+            )
+
+            with psycopg2.connect(LAKE_CONN) as conn:
+                with conn.cursor(
+                    cursor_factory=psycopg2.extras.RealDictCursor
+                ) as cur:
+
                     cur.execute(
                         f"""
-                        SELECT *
-                        FROM   raw.{table}
-                        WHERE  {cursor_field} > %s
-                        ORDER  BY {cursor_field} ASC
+                        SELECT
+                            id,
+                            raw_data,
+                            source_created_at,
+                            source_updated_at,
+                            extracted_at
+                        FROM raw.{table_name}
+                        WHERE {cursor_field} > %s
+                        ORDER BY {cursor_field}
                         """,
                         (updated_at.last_value,)
                     )
+
                     while True:
                         rows = cur.fetchmany(500)
+
                         if not rows:
                             break
+
+                        logger.info(
+                            f"{table_name}: fetched {len(rows)} rows"
+                        )
+
                         for row in rows:
-                            yield dict(row)
-            finally:
-                conn.close()
+
+                            yield {
+                                "id": row["id"],
+                                "raw_data": row["raw_data"],
+                                "source_created_at": row["source_created_at"],
+                                "source_updated_at": row["source_updated_at"],
+                                "extracted_at": row["extracted_at"]
+                            }
 
         return resource
 
     return [
-        make_resource(table, cfg["cursor_field"], cfg["primary_key"])
-        for table, cfg in TABLE_CONFIGS.items()
+        build_resource(
+            table_name,
+            config["cursor_field"],
+            config["primary_key"]
+        )
+        for table_name, config in TABLE_CONFIGS.items()
     ]
 
+# -------------------------------------------------------------------
+# PIPELINE
+# -------------------------------------------------------------------
 
-# ── Pipeline ──────────────────────────────────────────────────────────────────
+def build_pipeline():
 
-def build_pipeline() -> dlt.Pipeline:
     return dlt.pipeline(
         pipeline_name="retailco_lake_to_warehouse",
-        destination=dlt.destinations.postgres(WAREHOUSE_CONN),
+        destination=dlt.destinations.postgres(
+            credentials=WAREHOUSE_CONN
+        ),
         dataset_name="raw",
-        dev_mode=False,
+        dev_mode=False
     )
 
+# -------------------------------------------------------------------
+# RUNNER
+# -------------------------------------------------------------------
+def run_pipeline():
 
-# ── Entry point ───────────────────────────────────────────────────────────────
+    """ Runs the full lake to warehouse load. Called by the Airflow DAG after extraction succeeds. """
 
-def run_pipeline() -> None:
-    """
-    Runs the full lake to warehouse load.
-    Called by the Airflow DAG after extraction succeeds.
-    """
-    pipeline  = build_pipeline()
-    source    = lake_source()
+    logger.info("Starting Lake → Warehouse load")
 
-    logger.info("Starting dlt pipeline: lake → warehouse")
+    pipeline = build_pipeline()
+
+    source = lake_source()
+
     load_info = pipeline.run(source)
-    logger.info("dlt pipeline complete: %s", load_info)
+
+    logger.info("Pipeline completed successfully")
+
+    logger.info(load_info)
 
     for package in load_info.load_packages:
-        for job in package.jobs.get("failed_jobs", []):
-            raise RuntimeError(f"dlt job failed: {job}")
+        failed_jobs = package.jobs.get("failed_jobs", [])
 
+        if failed_jobs:
+            raise RuntimeError(
+                f"Pipeline failed with jobs: {failed_jobs}"
+            )
 
 if __name__ == "__main__":
     run_pipeline()
