@@ -1,25 +1,19 @@
--- stg_inventory_movements.sql
-with
-    source
-    as
-    (
-    select *
-    from {{ source('raw', 'inventory_movements') }}
+with source as (
+    select * from {{ source('raw', 'inventory_movements') }}
 ),
-final as
-(
+final as (
     select
-        raw_data->>'id'                             as movement_id,
-        raw_data->>'productId'                      as product_id,
-        raw_data->>'storeId'                        as store_id,
-        raw_data->>'movementType'                   as movement_type,
-        (raw_data->>'quantity')::int                as quantity,
-        raw_data->>'referenceId'                    as reference_id,
-        raw_data->>'referenceType'                  as reference_type,
-        raw_data->>'notes'                          as notes,
-        (raw_data->>'movedAt')::timestamp           as moved_at,
-        (raw_data->>'createdAt')::timestamp         as created_at,
-        (raw_data->>'updatedAt')::timestamp         as updated_at
+        raw_data__id                                as movement_id,
+        raw_data__product_id                        as product_id,
+        raw_data__store_id                          as store_id,
+        raw_data__movement_type                     as movement_type,
+        raw_data__quantity::int                     as quantity,
+        raw_data__reference_id                      as reference_id,
+        raw_data__reference_type                    as reference_type,
+        raw_data__notes                             as notes,
+        raw_data__moved_at                          as moved_at,
+        raw_data__created_at                        as created_at,
+        raw_data__updated_at                        as updated_at
     from source
 )
 select * from final

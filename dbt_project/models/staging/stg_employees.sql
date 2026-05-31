@@ -1,23 +1,18 @@
--- stg_employees.sql
-with 
-    source 
-    as(
-
-    select * 
-    from {{ source('raw', 'employees') }}
+with source as (
+    select * from {{ source('raw', 'employees') }}
 ),
-final as(
+final as (
     select
-        raw_data->>'id'                         as employee_id,
-        raw_data->>'storeId'                    as store_id,
-        raw_data->>'firstName'                  as first_name,
-        raw_data->>'lastName'                   as last_name,
-        raw_data->>'email'                      as email,
-        raw_data->>'role'                       as role,
-        raw_data->>'hiredDate'                  as hired_date,
-        (raw_data->>'isDeleted')::boolean       as is_deleted,
-        (raw_data->>'createdAt')::timestamp     as created_at,
-        (raw_data->>'updatedAt')::timestamp     as updated_at
+        raw_data__id                                as employee_id,
+        raw_data__store_id                          as store_id,
+        raw_data__first_name                        as first_name,
+        raw_data__last_name                         as last_name,
+        raw_data__email                             as email,
+        raw_data__role                              as role,
+        raw_data__hired_date                        as hired_date,
+        raw_data__is_deleted                        as is_deleted,
+        raw_data__created_at                        as created_at,
+        raw_data__updated_at                        as updated_at
     from source
 )
-select *from final
+select * from final

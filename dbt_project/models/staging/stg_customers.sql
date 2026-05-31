@@ -1,29 +1,23 @@
--- stg_customers.sql
-with
-    source
-    as
-    (
-    select *
-    from {{ source('raw', 'customers') }}
+with source as (
+    select * from {{ source('raw', 'customers') }}
 ),
-final as
-(
+final as (
     select
-        raw_data->>'id'                             as customer_id,
-        raw_data->>'firstName'                      as first_name,
-        raw_data->>'lastName'                       as last_name,
-        raw_data->>'email'                          as email,
-        raw_data->>'phone'                          as phone,
-        raw_data->>'segment'                        as segment,
-        raw_data->>'tier'                           as tier,
-        raw_data->>'address'                        as address,
-        raw_data->>'city'                           as city,
-        raw_data->>'state'                          as state,
-        (raw_data->>'effectiveFrom')::timestamp     as effective_from,
-        (raw_data->>'registeredAt')::timestamp      as registered_at,
-        (raw_data->>'isDeleted')::boolean           as is_deleted,
-        (raw_data->>'createdAt')::timestamp         as created_at,
-        (raw_data->>'updatedAt')::timestamp         as updated_at
+        raw_data__id                                as customer_id,
+        raw_data__first_name                        as first_name,
+        raw_data__last_name                         as last_name,
+        raw_data__email                             as email,
+        raw_data__phone                             as phone,
+        raw_data__segment                           as segment,
+        raw_data__tier                              as tier,
+        raw_data__address                           as address,
+        raw_data__city                              as city,
+        raw_data__state                             as state,
+        raw_data__effective_from                    as effective_from,
+        raw_data__registered_at                     as registered_at,
+        raw_data__is_deleted                        as is_deleted,
+        raw_data__created_at                        as created_at,
+        raw_data__updated_at                        as updated_at
     from source
 )
 select * from final
