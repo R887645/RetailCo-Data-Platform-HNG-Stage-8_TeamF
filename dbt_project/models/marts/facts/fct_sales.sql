@@ -1,6 +1,9 @@
 -- fct_sales.sql
 -- Grain: one row per order line item
--- Excludes cancelled orders from revenue analysis
+-- Business justification: transactional fact table capturing every
+-- product sold in every order. References surrogate keys from all
+-- relevant dimensions. Cancelled orders excluded from revenue analysis.
+-- margin_amount calculated as line_total minus cost_price x quantity.
 with order_items as (
     select * from {{ ref('stg_order_items') }}
 ),
