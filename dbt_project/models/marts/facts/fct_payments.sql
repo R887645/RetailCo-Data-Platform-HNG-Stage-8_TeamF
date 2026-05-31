@@ -1,7 +1,11 @@
 -- fct_payments.sql
 -- Grain: one row per payment event
--- Excludes anomalous payments (those go to flagged_payments)
--- Negative amount_paid with payment_type = refund are valid records
+-- Business justification: transactional fact table capturing every
+-- clean payment made against an order. Anomalous payments
+-- (zero amount and unexplained negatives) are excluded here
+-- and isolated in flagged_payments for data quality investigation.
+-- Refunds with negative amount_paid are kept as valid records.
+-- is_refund flag allows separate analysis of refund patterns.
 with payments as (
     select * from {{ ref('stg_payments') }}
     where not (amount_paid = 0)
