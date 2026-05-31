@@ -1,7 +1,48 @@
+# Environments
 .env
+.envrc
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Byte-compiled / optimized / DLL files
 __pycache__/
+*.py[codz]
+*$py.class
 *.pyc
-.venv/
-*.egg-info/
+
+# Distribution / packaging
+build/
 dist/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+coverage.xml
+*.cover
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# macOS
 .DS_Store
+
+# Visual Studio Code
+# .vscode/
+
+# Ruff
+.ruff_cache/
+
+# Temporary
+tempCodeRunnerFile.py
