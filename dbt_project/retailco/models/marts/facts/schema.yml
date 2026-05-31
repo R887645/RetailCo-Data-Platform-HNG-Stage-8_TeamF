@@ -1,0 +1,155 @@
+version: 2
+
+models:
+  - name: fct_sales
+    columns:
+      - name: sales_sk
+        tests:
+          - not_null
+          - unique
+      - name: date_key
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: date_key
+      - name: customer_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customer')
+              field: customer_sk
+      - name: product_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_product')
+              field: product_sk
+      - name: store_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_store')
+              field: store_sk
+      - name: quantity
+        tests:
+          - not_null
+      - name: gross_amount
+        tests:
+          - not_null
+
+  - name: fct_payments
+    columns:
+      - name: payment_sk
+        tests:
+          - not_null
+          - unique
+      - name: date_key
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: date_key
+      - name: customer_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customer')
+              field: customer_sk
+      - name: store_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_store')
+              field: store_sk
+      - name: payment_method_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_payment_method')
+              field: payment_method_sk
+      - name: amount_paid
+        tests:
+          - not_null
+
+  - name: fct_inventory_daily
+    columns:
+      - name: inventory_snapshot_sk
+        tests:
+          - not_null
+          - unique
+      - name: date_key
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: date_key
+      - name: product_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_product')
+              field: product_sk
+      - name: store_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_store')
+              field: store_sk
+      - name: closing_stock
+        tests:
+          - not_null
+
+  - name: fct_order_lifecycle
+    columns:
+      - name: order_lifecycle_sk
+        tests:
+          - not_null
+          - unique
+      - name: created_date_key
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: date_key
+      - name: customer_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customer')
+              field: customer_sk
+      - name: store_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_store')
+              field: store_sk
+      - name: order_id
+        tests:
+          - not_null
+          - unique
+      - name: current_status
+        tests:
+          - not_null
+
+  - name: flagged_payments
+    columns:
+      - name: flagged_payment_sk
+        tests:
+          - not_null
+          - unique
+      - name: payment_id
+        tests:
+          - not_null
+          - unique
+      - name: reason
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - 'zero amount payment'
+                - 'unexplained negative amount'
+                - 'other anomaly'
+      - name: amount_paid
+        tests:
+          - not_null

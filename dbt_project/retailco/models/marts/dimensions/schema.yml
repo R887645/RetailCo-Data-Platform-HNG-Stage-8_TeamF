@@ -1,0 +1,80 @@
+version: 2
+
+models:
+  - name: dim_date
+    columns:
+      - name: date_key
+        tests:
+          - not_null
+          - unique
+      - name: full_date
+        tests:
+          - not_null
+      - name: is_weekend
+        tests:
+          - not_null
+      - name: is_public_holiday
+        tests:
+          - not_null
+
+  - name: dim_customer
+    columns:
+      - name: customer_sk
+        tests:
+          - not_null
+          - unique
+      - name: customer_id
+        tests:
+          - not_null
+      - name: is_current
+        tests:
+          - not_null
+      - name: valid_from
+        tests:
+          - not_null
+
+  - name: dim_product
+    columns:
+      - name: product_sk
+        tests:
+          - not_null
+          - unique
+      - name: product_id
+        tests:
+          - not_null
+      - name: is_current
+        tests:
+          - not_null
+
+  - name: dim_store
+    columns:
+      - name: store_sk
+        tests:
+          - not_null
+          - unique
+      - name: store_id
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_employee
+    columns:
+      - name: employee_sk
+        tests:
+          - not_null
+          - unique
+      - name: employee_id
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_payment_method
+    columns:
+      - name: payment_method_sk
+        tests:
+          - not_null
+          - unique
+      - name: payment_method_id
+        tests:
+          - not_null
+          - unique
