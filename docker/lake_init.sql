@@ -1,5 +1,5 @@
 -- ============================================================
--- Lake Database — raw schema
+-- Lake Database : raw schema
 -- All columns match the EXACT API response fields from the ERD
 -- ============================================================
 
