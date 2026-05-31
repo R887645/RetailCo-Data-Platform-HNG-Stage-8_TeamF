@@ -1,5 +1,5 @@
 -- dim_employee.sql
--- No SCD2 needed — employee role changes are not tracked historically
+-- No SCD2 needed : employee role changes are not tracked historically
 with source as (
     select * from {{ ref('stg_employees') }}
 ),
