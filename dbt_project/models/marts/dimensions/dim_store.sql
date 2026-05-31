@@ -1,5 +1,5 @@
 -- dim_store.sql
--- No SCD2 needed — store attributes are stable
+-- No SCD2 needed: store attributes are stable
 with source as (
     select * from {{ ref('stg_stores') }}
 ),
