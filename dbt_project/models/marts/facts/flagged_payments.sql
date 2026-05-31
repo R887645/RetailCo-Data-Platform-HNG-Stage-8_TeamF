@@ -1,6 +1,9 @@
 -- flagged_payments.sql
--- Data quality artifact — not a fact table, not in the bus matrix
--- Isolates anomalous payments for compliance investigation
+-- Business justification: data quality artifact that isolates
+-- anomalous payment records from fct_payments.
+-- Payments with amount_paid = 0 or unexplained negative amounts
+-- are stored here for investigation by the compliance team.
+-- This is NOT a fact table and does not appear in the bus matrix.
 with payments as (
     select * from {{ ref('stg_payments') }}
 ),
