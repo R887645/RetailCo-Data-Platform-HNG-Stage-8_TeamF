@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  postgres_lake:
+    image: postgres:17
+    container_name: retailco_lake
+    environment:
+      POSTGRES_DB: retailco_lake
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5435:5432"
+    volumes:
+      - lake_data:/var/lib/postgresql/data
+
+  postgres_warehouse:
+    image: postgres:17
+    container_name: retailco_warehouse
+    environment:
+      POSTGRES_DB: retailco_warehouse
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - warehouse_data:/var/lib/postgresql/data
+
+volumes:
+  lake_data:
+  warehouse_data:
