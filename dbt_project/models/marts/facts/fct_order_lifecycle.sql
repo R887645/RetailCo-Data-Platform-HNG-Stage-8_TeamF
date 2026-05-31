@@ -1,6 +1,11 @@
 -- fct_order_lifecycle.sql
 -- Grain: one row per order
--- Accumulating snapshot — status timestamps fill in as order progresses
+-- Business justification: accumulating snapshot fact table that
+-- tracks each order through its full lifecycle from creation to
+-- delivery or cancellation. Status timestamps fill in over time
+-- as the order progresses through each stage.
+-- lifecycle_days calculated as days from order creation to
+-- final status for operational efficiency analysis.
 with orders as (
     select * from {{ ref('stg_orders') }}
 ),
