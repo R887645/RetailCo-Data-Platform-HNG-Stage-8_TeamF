@@ -54,11 +54,11 @@ TABLE_CONFIGS = {
 @dlt.source(name="lake")
 def lake_source():
 
- """
-    Builds one dlt resource per lake table.
-    Each resource loads incrementally using source_updated_at as the cursor.
-    dlt tracks the last value automatically so only new or updated rows
-    are moved on each run.
+    """
+        Builds one dlt resource per lake table.
+        Each resource loads incrementally using source_updated_at as the cursor.
+        dlt tracks the last value automatically so only new or updated rows
+        are moved on each run.
     """
     def build_resource(
         table_name: str,
