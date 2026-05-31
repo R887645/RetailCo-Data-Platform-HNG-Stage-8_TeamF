@@ -31,17 +31,16 @@ WAREHOUSE_CONN = os.environ["WAREHOUSE_CONN"]
 # primary_key:  column used for upsert (no duplicates)
 
 TABLE_CONFIGS = {
-    "stores":              {"cursor_field": "updated_at", "primary_key": "id"},
-    "employees":           {"cursor_field": "updated_at", "primary_key": "id"},
-    "payment_methods":     {"cursor_field": "updated_at", "primary_key": "id"},
-    "customers":           {"cursor_field": "updated_at", "primary_key": "id"},
-    "products":            {"cursor_field": "updated_at", "primary_key": "id"},
-    "orders":              {"cursor_field": "updated_at", "primary_key": "id"},
-    "order_items":         {"cursor_field": "updated_at", "primary_key": "id"},
-    "payments":            {"cursor_field": "updated_at", "primary_key": "id"},
-    "inventory_movements": {"cursor_field": "updated_at", "primary_key": "id"},
+    "stores":              {"cursor_field": "source_updated_at", "primary_key": "id"},
+    "employees":           {"cursor_field": "source_updated_at", "primary_key": "id"},
+    "payment_methods":     {"cursor_field": "source_updated_at", "primary_key": "id"},
+    "customers":           {"cursor_field": "source_updated_at", "primary_key": "id"},
+    "products":            {"cursor_field": "source_updated_at", "primary_key": "id"},
+    "orders":              {"cursor_field": "source_updated_at", "primary_key": "id"},
+    "order_items":         {"cursor_field": "source_updated_at", "primary_key": "id"},
+    "payments":            {"cursor_field": "source_updated_at", "primary_key": "id"},
+    "inventory_movements": {"cursor_field": "source_updated_at", "primary_key": "id"},
 }
-
 
 # ── Source: reads from Lake ───────────────────────────────────────────────────
 
