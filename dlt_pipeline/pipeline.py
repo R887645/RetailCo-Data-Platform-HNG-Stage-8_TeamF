@@ -15,6 +15,7 @@ import psycopg2
 import psycopg2.extras
 from dotenv import load_dotenv
 from pathlib import Path
+from datetime import datetime
 
 load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env", override=True)
 
@@ -74,7 +75,7 @@ def lake_source():
         def resource(
             updated_at=dlt.sources.incremental(
                 cursor_field,
-                initial_value="1970-01-01T00:00:00+00:00"
+                initial_value=datetime(1970, 1, 1, 0, 0, 0)
             )
         ) -> Iterator[dict]:
 
