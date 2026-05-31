@@ -147,7 +147,7 @@ models:
         tests:
           - not_null
           - unique
-      - name: flag_reason
+      - name: reason
         description: "Reason payment was flagged"
         tests:
           - not_null
