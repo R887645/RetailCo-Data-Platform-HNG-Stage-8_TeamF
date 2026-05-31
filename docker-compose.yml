@@ -1,0 +1,135 @@
+services:
+
+  # ── Lake database ────────────────────────────────────────────
+  postgres-lake:
+    image: postgres:15
+    container_name: postgres-lake
+    environment:
+      POSTGRES_USER: lake
+      POSTGRES_PASSWORD: lake
+      POSTGRES_DB: lake
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-lake-data:/var/lib/postgresql/data
+      - ./docker/lake_init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "lake"]
+      interval: 5s
+      retries: 10
+
+  # ── Warehouse database ───────────────────────────────────────
+  postgres-warehouse:
+    image: postgres:15
+    container_name: postgres-warehouse
+    environment:
+      POSTGRES_USER: warehouse
+      POSTGRES_PASSWORD: warehouse
+      POSTGRES_DB: warehouse
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-warehouse-data:/var/lib/postgresql/data
+      - ./docker/warehouse_init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "warehouse"]
+      interval: 5s
+      retries: 10
+
+  # ── Airflow metadata database ────────────────────────────────
+  postgres-meta:
+    image: postgres:15
+    container_name: postgres-meta
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres-meta-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 10
+
+  # ── Airflow initialisation (runs once) ───────────────────────
+  airflow-init:
+    image: apache/airflow:2.9.3
+    container_name: airflow-init
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres-meta/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      ERP_BASE_URL: ${ERP_BASE_URL}
+      ERP_API_KEY: ${ERP_API_KEY}
+      LAKE_CONN: ${LAKE_CONN}
+      WAREHOUSE_CONN: ${WAREHOUSE_CONN}
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        pip install psycopg2-binary dlt[postgres] dbt-core dbt-postgres requests python-dotenv
+        airflow db migrate
+        airflow users create \
+          --username admin --password admin \
+          --firstname Admin --lastname Admin \
+          --role Admin --email admin@retailco.ng || true
+    depends_on:
+      postgres-meta:
+        condition: service_healthy
+    restart: on-failure
+
+  # ── Airflow webserver (UI at localhost:8080) ─────────────────
+  airflow-webserver:
+    image: apache/airflow:2.9.3
+    container_name: airflow-webserver
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres-meta/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      ERP_BASE_URL: ${ERP_BASE_URL}
+      ERP_API_KEY: ${ERP_API_KEY}
+      LAKE_CONN: ${LAKE_CONN}
+      WAREHOUSE_CONN: ${WAREHOUSE_CONN}
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./extractor:/opt/airflow/extractor
+      - ./dlt_pipeline:/opt/airflow/dlt_pipeline
+      - ./dbt_project:/opt/airflow/dbt_project
+      - airflow-logs:/opt/airflow/logs
+    ports:
+      - "8080:8080"
+    command: webserver
+    depends_on:
+      postgres-meta:
+        condition: service_healthy
+    restart: always
+
+  # ── Airflow scheduler (runs the DAGs) ────────────────────────
+  airflow-scheduler:
+    image: apache/airflow:2.9.3
+    container_name: airflow-scheduler
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres-meta/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      ERP_BASE_URL: ${ERP_BASE_URL}
+      ERP_API_KEY: ${ERP_API_KEY}
+      LAKE_CONN: ${LAKE_CONN}
+      WAREHOUSE_CONN: ${WAREHOUSE_CONN}
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./extractor:/opt/airflow/extractor
+      - ./dlt_pipeline:/opt/airflow/dlt_pipeline
+      - ./dbt_project:/opt/airflow/dbt_project
+      - airflow-logs:/opt/airflow/logs
+    command: scheduler
+    depends_on:
+      postgres-meta:
+        condition: service_healthy
+    restart: always
+
+volumes:
+  postgres-lake-data:
+  postgres-warehouse-data:
+  postgres-meta-data:
+  airflow-logs:
