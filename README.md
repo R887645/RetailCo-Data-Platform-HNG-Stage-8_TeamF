@@ -269,7 +269,7 @@ dbt_marts
 dbt_test
 ```
 
-Every task has 2 retries with 5 minute initial delay and exponential backoff. Failure at any task stops all downstream tasks automatically.
+Every task has 5 retries with a 5-minute initial delay and exponential backoff. Failure at any task stops all downstream tasks automatically.
 
 ---
 
