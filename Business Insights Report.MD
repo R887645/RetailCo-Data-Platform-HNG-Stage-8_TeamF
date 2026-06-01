@@ -17,7 +17,7 @@ This report answers five management questions using data extracted from RetailCo
 
 **Revenue Trend**
 
-RetailCo’s revenue has grown consistently and dramatically since May 2024. Monthly category revenue started at under ₦800,000 in May 2024 and reached over ₦300 billion per category by April 2026 — a growth of more than 37,000% in under two years. This reflects strong customer acquisition and increasing order volumes across all store locations.
+RetailCo’s revenue has grown consistently and dramatically since May 2024. Monthly category revenue started at under ₦800,000 in May 2024 and reached over ₦300 billion per category by April 2026 which a growth of more than 37,000% in under two years. This reflects strong customer acquisition and increasing order volumes across all store locations.
 
 **Top Performing Categories (April 2026)**
 
@@ -48,9 +48,9 @@ Food & Beverage dominates the top product list, with Practical Frozen Towels gen
 
 **Revenue by Store**
 
-All four RetailCo stores — Lagos, Abuja, Port Harcourt, and Kano — contribute meaningfully to revenue. Top-performing individual product-store combinations include RetailCo Port Harcourt with Rustic Fresh Bacon (₦1.48 billion in December 2024) and RetailCo Abuja with Sleek Steel Pizza (₦1.36 billion in December 2024).
+All four RetailCo stores in Lagos, Abuja, Port Harcourt, and Kano  contributes meaningfully to revenue. Top performing individual product-store combinations include RetailCo Port Harcourt with Rustic Fresh Bacon (₦1.48 billion in December 2024) and RetailCo Abuja with Sleek Steel Pizza (₦1.36 billion in December 2024).
 
-**Key Insight:** Revenue growth is accelerating quarter over quarter. Sports and Automotive categories show the most consistent top-3 performance, while Books & Media has shown the strongest recent growth trend.
+**Key Insight:** Revenue growth is accelerating quarter over quarter. Sports and Automotive categories show the most consistent top 3 performance, while Books & Media has shown the strongest recent growth trend.
 
 -----
 
@@ -58,7 +58,7 @@ All four RetailCo stores — Lagos, Abuja, Port Harcourt, and Kano — contribut
 
 ### How often do customers purchase, what is their average order value, and how do segments differ?
 
-RetailCo serves four customer segments — wholesale, retail, corporate, and VIP — each further divided into four tiers: platinum, gold, silver, and bronze.
+RetailCo serves four customer segments — wholesale, retail, corporate, and VIP which each is further divided into four tiers: platinum, gold, silver, and bronze.
 
 **Segment Summary**
 
@@ -84,7 +84,7 @@ The highest revenue combination is Retail Platinum with ₦1.31 trillion in tota
 
 - All segments purchase at a remarkably similar frequency of 6.8 to 7.1 orders per customer — indicating consistent engagement across all customer types
 - VIP customers surprisingly have the lowest purchase frequency (6.8) despite being premium customers
-- Corporate Silver customers have the highest average order value at ₦645,812 — suggesting large bulk purchases
+- Corporate Silver customers have the highest average order value at ₦645,812 which suggests large bulk purchases
 - Retail Platinum is the single most valuable segment by total revenue
 
 -----
