@@ -391,7 +391,7 @@ ORDER BY discount_pct DESC;
 ### Question 4 — Payment Channel Insights
 ```sql
 --Which payment methods experience the most refunds.
--- SELECT
+SELECT
     pm.payment_method_name,
     pm.provider,
     pm.is_digital,
