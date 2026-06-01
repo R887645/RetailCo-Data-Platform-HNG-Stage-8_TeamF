@@ -324,9 +324,9 @@ RetailCo-Data-Platform-HNG-Stage-8_TeamF/
 │   └── dags/
 │       └── retailco_pipeline.py    # CP5: Full end-to-end DAG
 └── design/
-    ├── bus_matrix.png              # Kimball bus matrix
-    ├── warehouse_erd.png           # All tables, PKs, FKs, SCD2 columns
-    └── architecture_diagram.png   # Full system architecture
+    ├── bus_matrix.pdf              # Kimball bus matrix
+    ├── warehouse_erd.pdf          # All tables, PKs, FKs, SCD2 columns
+    └── architecture_diagram.pdf   # Full system architecture
 ```
 
 ---
