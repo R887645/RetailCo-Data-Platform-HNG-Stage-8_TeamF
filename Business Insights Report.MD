@@ -235,7 +235,4 @@ Additionally, a small number of products show negative stock_sold values resulti
 1. **Payment channels are well diversified** — Mobile Money leads but no single method dominates; 80% of transactions are digital
 1. **Data quality is monitored and controlled** — 1,398 anomalous payments detected and quarantined; dbt tests confirm warehouse integrity
 
------
 
-*Report generated from RetailCo Data Platform — Team F, HNG Stage 8*
-*Data sourced from raw_marts schema — retailco_warehouse database*
