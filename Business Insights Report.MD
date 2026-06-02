@@ -178,6 +178,8 @@ The highest revenue combination is Retail Platinum with ₦1.31 trillion in tota
 
 ## Question 5 — Operational Data Quality
 
+The flagged_payments table serves as evidence that our data quality monitoring is working correctly. The same 1,398 anomalous records flagged in Q4 were automatically detected and quarantined by the pipeline before they could corrupt revenue figures. 
+
 ### What anomalies exist in the raw data, and how are they flagged?
 
 **Flagged Payment Anomalies**
@@ -187,7 +189,7 @@ The highest revenue combination is Retail Platinum with ₦1.31 trillion in tota
 |Unexplained negative amount|754  |₦1,888,016    |
 |Zero amount payment        |644  |₦0            |
 
-A total of 1,398 anomalous payment records were detected by the pipeline. These represent 6.6% of all payment records and have been quarantined in the `flagged_payments` data quality artifact. The ₦1.89 million at risk from unexplained negative payments has been flagged for compliance review.
+These represent 6.6% of all payment records and have been quarantined in the `flagged_payments` data quality artifact. The ₦1.89 million at risk from unexplained negative payments has been flagged for compliance review.
 
 **Order Lifecycle Health**
 
