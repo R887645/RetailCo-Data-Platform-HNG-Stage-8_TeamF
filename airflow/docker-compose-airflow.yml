@@ -9,58 +9,64 @@ x-airflow-common: &airflow-common
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
     PYTHONPATH: /opt/airflow/extractor:/opt/airflow/dlt_pipeline
     _PIP_ADDITIONAL_REQUIREMENTS: 'dlt[postgres] psycopg2-binary python-dotenv dbt-core dbt-postgres'
+
   env_file:
     - ../.env
+
   volumes:
     - ./dags:/opt/airflow/dags
     - ../extractor:/opt/airflow/extractor
     - ../dlt_pipeline:/opt/airflow/dlt_pipeline
     - ../dbt_project:/opt/airflow/dbt_project
     - airflow_logs:/opt/airflow/logs
+
   depends_on:
     airflow_db:
       condition: service_healthy
 
 services:
+
   airflow_db:
     image: postgres:17
     environment:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
+
     volumes:
       - airflow_db_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 5s
+      timeout: 5s
       retries: 5
 
   airflow_init:
-  <<: *airflow-common
-  command: >
-    bash -c "
-    airflow db migrate &&
-    airflow users create \
-      --username admin \
-      --firstname Admin \
-      --lastname User \
-      --role Admin \
-      --email admin@retailco.com \
+    <<: *airflow-common
+    command: >
+      bash -c "
+      airflow db migrate &&
+      airflow users create
+      --username admin
+      --firstname Admin
+      --lastname User
+      --role Admin
+      --email admin@retailco.com
       --password admin || true
-    "
-  restart: on-failure
+      "
+    restart: on-failure
 
   airflow_webserver:
-  <<: *airflow-common
-  command: webserver
-  ports:
-    - "8080:8080"
-  restart: always
-  healthcheck:
-    test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
-    interval: 30s
-    timeout: 10s
-    retries: 5
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - "8080:8080"
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   airflow_scheduler:
     <<: *airflow-common
