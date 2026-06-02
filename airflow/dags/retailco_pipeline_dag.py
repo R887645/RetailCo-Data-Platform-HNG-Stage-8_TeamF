@@ -49,15 +49,35 @@ default_args = {
 }
 
 def run_setup():
+    logger.info("Preparing extraction environment")
+
     setup_watermark_table()
     setup_raw_tables()
 
+    logger.info("Setup completed")
+
 def run_extract(entity):
-    client = ERPClient()
-    extract_entity(client, entity)
+    try:
+        logger.info(f"Starting extraction: {entity}")
+
+        client = ERPClient()
+        extract_entity(client, entity)
+
+        logger.info(f"Completed extraction: {entity}")
+
+    except Exception as e:
+        logger.exception(f"Failed extracting {entity}: {e}")
+        raise
 
 def run_dlt():
-    run_pipeline()
+    try:
+        logger.info("Starting dlt load")
+        run_pipeline()
+        logger.info("dlt load completed")
+
+    except Exception as e:
+        logger.exception(f"dlt load failed: {e}")
+        raise
 
 with DAG(
     dag_id="retailco_master_pipeline",
@@ -92,35 +112,50 @@ with DAG(
     # ── dlt Load ──────────────────────────────────────────────────
     dlt_load_task = PythonOperator(
         task_id="dlt_load",
-        python_callable=run_dlt,
+        bash_command=f"""
+        cd {DBT_PROJECT_DIR} &&
+        dbt snapshot --profiles-dir .
+        """,
+        execution_timeout=timedelta(minutes=20)
     )
 
     # ── dbt Snapshot ──────────────────────────────────────────────
     dbt_snapshot_task = BashOperator(
         task_id="dbt_snapshot",
-        bash_command=f"cd {DBT_PROJECT_DIR} && dbt snapshot",
-        retries=2,
+        bash_command=f"""
+        cd {DBT_PROJECT_DIR} &&
+        dbt snapshot --profiles-dir .
+        """,
+        execution_timeout=timedelta(minutes=20)
     )
 
     # ── dbt Staging ───────────────────────────────────────────────
     dbt_staging_task = BashOperator(
         task_id="dbt_staging",
-        bash_command=f"cd {DBT_PROJECT_DIR} && dbt run --select staging",
-        retries=2,
+        bash_command=f"""
+        cd {DBT_PROJECT_DIR} &&
+        dbt run --select staging --profiles-dir .
+        """,
+        execution_timeout=timedelta(minutes=20)
     )
-
     # ── dbt Marts ─────────────────────────────────────────────────
     dbt_marts_task = BashOperator(
         task_id="dbt_marts",
-        bash_command=f"cd {DBT_PROJECT_DIR} && dbt run --select marts",
-        retries=2,
+        bash_command=f"""
+        cd {DBT_PROJECT_DIR} &&
+        dbt run --select marts --profiles-dir .
+        """,
+        execution_timeout=timedelta(minutes=20)
     )
 
     # ── dbt Test ──────────────────────────────────────────────────
     dbt_test_task = BashOperator(
         task_id="dbt_test",
-        bash_command=f"cd {DBT_PROJECT_DIR} && dbt test",
-        retries=2,
+        bash_command=f"""
+        cd {DBT_PROJECT_DIR} &&
+        dbt test --profiles-dir .
+        """,
+        execution_timeout=timedelta(minutes=20)
     )
 
     # ── Task Dependencies ─────────────────────────────────────────
