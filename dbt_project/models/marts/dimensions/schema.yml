@@ -2,7 +2,7 @@ version: 2
 
 models:
   - name: dim_date
-    description: "Date dimension covering 3 years with Nigerian public holidays"
+    description: "Date dimension covering 2023-2027 with Nigerian public holidays"
     columns:
       - name: date_key
         description: "YYYYMMDD integer primary key"
@@ -23,7 +23,7 @@ models:
           - not_null
 
   - name: dim_customer
-    description: "SCD2 customer dimension with surrogate keys"
+    description: "SCD2 customer dimension — tracks changes to segment, tier and address"
     columns:
       - name: customer_sk
         description: "Surrogate key — primary key for this dimension"
@@ -39,12 +39,12 @@ models:
         tests:
           - not_null
       - name: valid_from
-        description: "Start date of this version"
+        description: "Start timestamp of this version"
         tests:
           - not_null
 
   - name: dim_product
-    description: "SCD2 product dimension with surrogate keys"
+    description: "SCD2 product dimension — tracks changes to price and category"
     columns:
       - name: product_sk
         description: "Surrogate key — primary key for this dimension"
@@ -60,104 +60,44 @@ models:
         tests:
           - not_null
 
-  - name: fct_sales
-    description: "Transactional fact — one row per order line item"
+  - name: dim_store
+    description: "Store dimension — four RetailCo locations across Nigeria"
     columns:
-      - name: sales_sk
-        description: "Surrogate primary key"
-        tests:
-          - not_null
-          - unique
-      - name: date_key
-        description: "Foreign key to dim_date"
-        tests:
-          - not_null
-          - relationships:
-              to: ref('dim_date')
-              field: date_key
-      - name: customer_sk
-        description: "Foreign key to dim_customer"
-        tests:
-          - not_null
-          - relationships:
-              to: ref('dim_customer')
-              field: customer_sk
-      - name: product_sk
-        description: "Foreign key to dim_product"
-        tests:
-          - not_null
-          - relationships:
-              to: ref('dim_product')
-              field: product_sk
       - name: store_sk
-        description: "Foreign key to dim_store"
-        tests:
-          - not_null
-          - relationships:
-              to: ref('dim_store')
-              field: store_sk
-      - name: quantity
-        description: "Must be greater than zero"
-        tests:
-          - not_null
-      - name: gross_amount
-        description: "Must be greater than zero"
-        tests:
-          - not_null
-
-  - name: fct_inventory_daily
-    description: "Periodic snapshot — one row per product per store per day"
-    columns:
-      - name: inventory_snapshot_sk
-        description: "Surrogate primary key"
+        description: "Surrogate key — primary key for this dimension"
         tests:
           - not_null
           - unique
-      - name: date_key
-        description: "Foreign key to dim_date"
-        tests:
-          - not_null
-          - relationships:
-              to: ref('dim_date')
-              field: date_key
-      - name: product_sk
-        description: "Foreign key to dim_product"
-        tests:
-          - not_null
-          - relationships:
-              to: ref('dim_product')
-              field: product_sk
-      - name: store_sk
-        description: "Foreign key to dim_store"
-        tests:
-          - not_null
-          - relationships:
-              to: ref('dim_store')
-              field: store_sk
-      - name: closing_stock
-        description: "Closing stock must not be negative"
-        tests:
-          - not_null
-
-  - name: flagged_payments
-    description: "Data quality artifact — anomalous payments isolated here"
-    columns:
-      - name: flagged_payment_sk
-        description: "Surrogate primary key"
+      - name: store_id
+        description: "Natural key from source system"
         tests:
           - not_null
           - unique
-      - name: reason
-        description: "Reason payment was flagged"
+
+  - name: dim_employee
+    description: "Employee dimension — linked to stores via store_sk"
+    columns:
+      - name: employee_sk
+        description: "Surrogate key — primary key for this dimension"
         tests:
           - not_null
-          - accepted_values:
-              values: [
-                'zero amount payment',
-                'unexplained negative amount',
-                'other anomaly'
-              ]
-      - name: amount_paid
-        description: "Original payment amount"
+          - unique
+      - name: employee_id
+        description: "Natural key from source system"
         tests:
           - not_null
+          - unique
+
+  - name: dim_payment_method
+    description: "Payment method dimension — cash, card, transfer, mobile money, USSD"
+    columns:
+      - name: payment_method_sk
+        description: "Surrogate key — primary key for this dimension"
+        tests:
+          - not_null
+          - unique
+      - name: payment_method_id
+        description: "Natural key from source system"
+        tests:
+          - not_null
+          - unique
