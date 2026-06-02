@@ -72,7 +72,7 @@ RetailCo-Data-Platform-HNG-Stage-8_TeamF/
 │   ├── paginator.py
 │   ├── watermark.py
 │   └── requirements.txt
-├── dlt_pipeline/                        # CP3: dlt load pipeline
+├── dlt_pipeline/                        # CP3: dlt incremental merge pipeline using source_updated_at cursor
 │   ├── pipeline.py
 │   └── requirements.txt
 ├── dbt_project/                         # CP4: Kimball dimensional models
@@ -228,8 +228,8 @@ docker-compose exec airflow_scheduler \
 ```bash
 docker-compose exec airflow_scheduler \
   airflow dags backfill retailco_master_pipeline \
-  --start-date 2024-01-01 \
-  --end-date 2024-12-31
+  --start-date 2025-01-01 \
+  
 ```
 
 ---
@@ -270,7 +270,8 @@ dbt_marts
 dbt_test
 ```
 
-Every task has 5 retries with a 5-minute initial delay and exponential backoff. Failure at any task stops all downstream tasks automatically.
+Every task has 2 retries with a 5-minute delay and exponential backoff.
+Failure at any task stops all downstream tasks automatically.
 
 ---
 
