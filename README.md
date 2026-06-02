@@ -38,7 +38,22 @@ Warehouse PostgreSQL — schema: raw_marts
 All components run inside Docker containers and are orchestrated by Apache Airflow 2.9.0 on a daily schedule.
 
 ---
+## Incremental Processing
 
+The platform avoids full reloads.
+
+Layer 1: Extractor
+- Stores entity-level watermarks
+- Calls ERP API with updated_after timestamps
+
+Layer 2: dlt
+- Tracks source_updated_at cursor
+- Loads only changed records
+
+Layer 3: dbt Snapshots
+- Detects attribute changes
+- Maintains historical versions of customers and products
+---
 ## Tools and Versions
 
 | Layer | Tool | Version |
@@ -212,6 +227,21 @@ Password: admin
 
 ## How to Run the Pipeline
 
+## Airflow Pipeline
+
+The complete RetailCo platform is orchestrated using Apache Airflow.
+
+Execution sequence:
+
+Extract
+→ dlt Load
+→ dbt Snapshot
+→ dbt Staging
+→ dbt Marts
+→ dbt Tests
+
+![Airflow DAG](design/airflow_dag.png)
+
 ### Option 1: Airflow UI (recommended)
 1. Open `http://localhost:8080`
 2. Find the DAG called `retailco_master_pipeline`
@@ -273,6 +303,21 @@ dbt_test
 Every task has 2 retries with a 5-minute delay and exponential backoff.
 Failure at any task stops all downstream tasks automatically.
 
+## Data Quality
+
+dbt tests validate:
+
+- Primary key uniqueness
+- Non-null business keys
+- Referential integrity
+- Positive sales quantities
+- Valid order lifecycle statuses
+- Inventory stock consistency
+- Payment quality rules
+
+Current Result:
+
+106 / 106 tests passing
 ---
 
 ## How to Query the Warehouse
@@ -563,9 +608,20 @@ LIMIT 20;
 
 
 ```
+
+## Business Questions Supported
+
+The warehouse is designed to answer five core management questions:
+
+1. Revenue performance across stores and products
+2. Customer purchasing behaviour and order value
+3. Product profitability and discount effectiveness
+4. Payment channel performance and refund trends
+5. Inventory health and operational quality
+
+The SQL examples below demonstrate how analysts can answer these questions directly from the dimensional model.
+
 ---
-
-
 
 ## Key Design Decisions
 
