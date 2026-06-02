@@ -6,34 +6,60 @@
 -- This is NOT a fact table and does not appear in the bus matrix.
 
 with payments as (
-    select * from {{ ref('stg_payments') }}
+
+    select *
+    from {{ ref('stg_payments') }}
 ),
+
 dim_customer as (
+
     select * from {{ ref('dim_customer') }}
-    where is_current = true
 ),
+
 final as (
+
     select
-        {{ dbt_utils.generate_surrogate_key(['payment_id']) }}      as flagged_payment_sk,
+
+        {{ dbt_utils.generate_surrogate_key(['p.payment_id']) }} as flagged_payment_sk,
+
         p.payment_id,
         p.order_id,
+
         dc.customer_sk,
+
         p.amount_paid,
         p.currency,
         p.payment_type,
+        p.status,
+
         case
             when p.amount_paid = 0
                 then 'zero amount payment'
+
             when p.amount_paid < 0
-                and p.payment_type != 'refund'
+                 and p.payment_type != 'refund'
                 then 'unexplained negative amount'
+
             else 'other anomaly'
-        end                                                         as reason,
-        p.created_at                                                as flagged_at
+        end as reason,
+
+        p.created_at as flagged_at
+
     from payments p
+
     left join dim_customer dc
         on dc.customer_id = p.customer_id
+        and p.created_at >= dc.valid_from
+        and (
+            dc.valid_to is null
+            or p.created_at < dc.valid_to
+        )
+
     where p.amount_paid = 0
-       or (p.amount_paid < 0 and p.payment_type != 'refund')
+       or (
+            p.amount_paid < 0
+            and p.payment_type != 'refund'
+       )
 )
+
 select * from final
