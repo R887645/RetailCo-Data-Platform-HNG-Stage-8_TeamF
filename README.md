@@ -684,9 +684,9 @@ Confirm `retailco_warehouse` shows status Up and healthy.
 
 ---
 ## Demo Video
-Access the demo video via the link 
 
-https://drive.google.com/file/d/1J1ssTjigDYn1-8yxzD8erQ54xTl5zjTf/view?usp=sharing
+Watch the end-to-end pipeline demonstration here:
+https://drive.google.com/file/d/13HK4HvEBR--8vzPRi7R-TX0Fv0kNuqdH/view?usp=sharing
 
 ---
 ## Team
