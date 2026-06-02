@@ -683,7 +683,12 @@ Confirm `retailco_warehouse` shows status Up and healthy.
 | CP5 | Operate — Airflow orchestration + Docker | ✅ Complete |
 
 ---
+## Demo Video
+Access the demo video via the link 
 
+https://drive.google.com/file/d/1J1ssTjigDYn1-8yxzD8erQ54xTl5zjTf/view?usp=sharing
+
+---
 ## Team
 
 **Team F — HNG Stage 8 Data Engineering**
