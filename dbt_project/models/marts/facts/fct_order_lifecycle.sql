@@ -6,78 +6,113 @@
 -- as the order progresses through each stage.
 -- lifecycle_days calculated as days from order creation to
 -- final status for operational efficiency analysis.
+
 with orders as (
-    select * from {{ ref('stg_orders') }}
-),
-dim_date as (
-    select * from {{ ref('dim_date') }}
+    select *
+    from {{ ref('stg_orders') }}
 ),
 dim_customer as (
     select * from {{ ref('dim_customer') }}
-    where is_current = true
 ),
 dim_store as (
     select * from {{ ref('dim_store') }}
 ),
 dim_employee as (
     select * from {{ ref('dim_employee') }}
+
 ),
+
+created_dd as (
+    select *
+    from {{ ref('dim_date') }}
+
+),
+
+paid_dd as (
+    select *
+    from {{ ref('dim_date') }}
+
+),
+
+shipped_dd as (
+    select *
+    from {{ ref('dim_date') }}
+
+),
+
+delivered_dd as (
+    select *
+    from {{ ref('dim_date') }}
+
+),
+
+cancelled_dd as (
+    select *
+    from {{ ref('dim_date') }}
+
+),
+
 final as (
     select
-        {{ dbt_utils.generate_surrogate_key(['o.order_id']) }}      as order_lifecycle_sk,
+
+        {{ dbt_utils.generate_surrogate_key(['o.order_id']) }} as order_lifecycle_sk,
+
         o.order_id,
+
         dc.customer_sk,
         ds.store_sk,
         de.employee_sk,
-        dd.date_key                                                 as created_date_key,
-        case
-            when o.paid_at is not null
-            then (
-                select date_key from {{ ref('dim_date') }}
-                where full_date = o.paid_at::date
-            )
-        end                                                         as paid_date_key,
-        case
-            when o.shipped_at is not null
-            then (
-                select date_key from {{ ref('dim_date') }}
-                where full_date = o.shipped_at::date
-            )
-        end                                                         as shipped_date_key,
-        case
-            when o.delivered_at is not null
-            then (
-                select date_key from {{ ref('dim_date') }}
-                where full_date = o.delivered_at::date
-            )
-        end                                                         as delivered_date_key,
-        case
-            when o.cancelled_at is not null
-            then (
-                select date_key from {{ ref('dim_date') }}
-                where full_date = o.cancelled_at::date
-            )
-        end                                                         as cancelled_date_key,
-        o.ordered_at                                                as order_created_at,
+
+        created_dd.date_key as created_date_key,
+        paid_dd.date_key as paid_date_key,
+        shipped_dd.date_key as shipped_date_key,
+        delivered_dd.date_key as delivered_date_key,
+        cancelled_dd.date_key as cancelled_date_key,
+
+        o.ordered_at as order_created_at,
         o.paid_at,
         o.shipped_at,
         o.delivered_at,
         o.cancelled_at,
-        o.status                                                    as current_status,
+
+        o.status as current_status,
+
         case
             when o.delivered_at is not null
             then extract(
                 day from o.delivered_at - o.ordered_at
             )::int
-        end                                                         as lifecycle_days
+        end as lifecycle_days
+
     from orders o
-    join dim_date dd
-        on dd.full_date = o.ordered_at::date
+
     join dim_customer dc
         on dc.customer_id = o.customer_id
+        and o.ordered_at >= dc.valid_from
+        and (
+            dc.valid_to is null
+            or o.ordered_at < dc.valid_to
+        )
+
     join dim_store ds
         on ds.store_id = o.store_id
+
     left join dim_employee de
         on de.employee_id = o.employee_id
+
+    left join created_dd
+        on created_dd.full_date = o.ordered_at::date
+
+    left join paid_dd
+        on paid_dd.full_date = o.paid_at::date
+
+    left join shipped_dd
+        on shipped_dd.full_date = o.shipped_at::date
+
+    left join delivered_dd
+        on delivered_dd.full_date = o.delivered_at::date
+
+    left join cancelled_dd
+        on cancelled_dd.full_date = o.cancelled_at::date
 )
 select * from final
