@@ -240,7 +240,7 @@ Extract
 → dbt Marts
 → dbt Tests
 
-![Airflow DAG](airflow/airflow diagram.png)
+![Airflow DAG](airflow/airflow-diagram.png)
 
 ### Option 1: Airflow UI (recommended)
 1. Open `http://localhost:8080`
