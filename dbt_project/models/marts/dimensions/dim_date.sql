@@ -1,6 +1,6 @@
 -- dim_date.sql
 -- Business justification: date dimension required by all four facts
--- tables for time-based analysis. Covers 3 years 
+-- tables for time-based analysis. Covers 4 years 
 -- Includes Nigerian public holidays.
 -- date_key format is YYYYMMDD as an integer for fast joins.
 
@@ -8,11 +8,10 @@ with date_spine as (
     select
         generate_series(
             '2023-01-01'::date,
-            '2025-12-31'::date,
+            '2027-12-31'::date,
             '1 day'::interval
         )::date as full_date
 ),
-
 nigerian_holidays as (
     select unnest(array[
         '2023-01-01'::date, '2023-04-07', '2023-04-10',
@@ -24,33 +23,37 @@ nigerian_holidays as (
         '2024-12-25', '2024-12-26',
         '2025-01-01', '2025-03-31', '2025-04-18', '2025-04-21',
         '2025-05-01', '2025-06-06', '2025-06-12',
-        '2025-09-05', '2025-10-01', '2025-12-25', '2025-12-26'
+        '2025-09-05', '2025-10-01', '2025-12-25', '2025-12-26',
+        '2026-01-01', '2026-04-03', '2026-04-06',
+        '2026-05-01', '2026-06-12', '2026-06-26', '2026-06-27',
+        '2026-10-01', '2026-12-25', '2026-12-26',
+        '2027-01-01', '2027-03-26', '2027-03-29',
+        '2027-05-01', '2027-06-12', '2027-06-16', '2027-06-17',
+        '2027-10-01', '2027-12-25', '2027-12-26'
     ]) as holiday_date
 ),
-
 final as (
     select
-        to_char(d.full_date, 'YYYYMMDD')::int      as date_key,
-        d.full_date                                 as full_date,
-        extract(year from d.full_date)::int         as year,
-        extract(quarter from d.full_date)::int      as quarter,
-        extract(month from d.full_date)::int        as month,
-        to_char(d.full_date, 'Month')               as month_name,
-        extract(week from d.full_date)::int         as week,
-        extract(day from d.full_date)::int          as day,
-        extract(dow from d.full_date)::int          as day_of_week,
-        to_char(d.full_date, 'Day')                 as day_name,
+        to_char(d.full_date, 'YYYYMMDD')::int           as date_key,
+        d.full_date                                      as full_date,
+        extract(year from d.full_date)::int              as year,
+        extract(quarter from d.full_date)::int           as quarter,
+        extract(month from d.full_date)::int             as month,
+        to_char(d.full_date, 'Month')                    as month_name,
+        extract(week from d.full_date)::int              as week,
+        extract(day from d.full_date)::int               as day,
+        extract(dow from d.full_date)::int               as day_of_week,
+        to_char(d.full_date, 'Day')                      as day_name,
         case
             when extract(dow from d.full_date) in (0, 6)
             then true else false
-        end                                         as is_weekend,
+        end                                              as is_weekend,
         case
             when h.holiday_date is not null
             then true else false
-        end                                         as is_public_holiday
+        end                                              as is_public_holiday
     from date_spine d
     left join nigerian_holidays h
         on d.full_date = h.holiday_date
 )
-
 select * from final
