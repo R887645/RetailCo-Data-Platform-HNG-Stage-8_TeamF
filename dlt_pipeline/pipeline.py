@@ -3,7 +3,7 @@ RetailCo dlt Pipeline: Checkpoint 3
 Reads from Lake PostgreSQL (raw schema)
 Writes to Warehouse PostgreSQL (raw schema)
 """
-
+---
 from __future__ import annotations
 
 import logging
