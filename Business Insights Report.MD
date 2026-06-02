@@ -1,7 +1,6 @@
 # RetailCo Data Platform — Business Insights Report
 
 **Team F | HNG Stage 8 | Data Engineering Pipeline**
-**Reporting Period: May 2024 — May 2026**
 
 -----
 
@@ -253,4 +252,22 @@ Digital channels account for over 80% of all transactions, demonstrating clear c
 
 5. **Strengthen Data Quality and Operational Monitoring**:
 The platform successfully identified 1,398 anomalous payment records and highlighted inventory and order-processing exceptions. Management should implement automated monitoring and exception reporting to proactively detect operational issues, improve data reliability, and support faster business decision-making.
+
+
+-----
+
+
+## Future Enhancement and Opportunity for ReailCo 
+
+1. **Implement Executive Dashboards**:
+Leverage the Kimball warehouse by building executive dashboards in tools such as Power BI or Tableau. This will provide leadership with self-service access to revenue, customer, inventory, and payment KPIs without relying on manual report generation.
+
+2. **Introduce Automated Data Quality Alerts**:
+While the pipeline successfully isolates anomalous payments, proactive alerting should be implemented. Automated notifications can be triggered when unusual payment activity, inventory discrepancies, or spikes in order cancellations exceed predefined thresholds.
+
+3. **Expand Customer Analytics Capabilities**:
+The new warehouse provides a strong foundation for advanced analytics. RetailCo can leverage historical customer data to develop customer lifetime value (CLV), churn prediction, and customer segmentation models to support targeted marketing initiatives.
+
+4. **Monitor Pipeline Performance and Reliability**:
+The platform should include operational monitoring for DAG execution times, data freshness, failure rates, and resource utilization. This will ensure the data platform remains scalable and reliable as transaction volumes increase.
 
