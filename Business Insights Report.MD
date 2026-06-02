@@ -239,18 +239,18 @@ Additionally, a small number of products show negative stock_sold values resulti
 
 ## Strategic Business Recommendations
 
-1. **Prioritize Investment in High-Growth Revenue Categories**
+1. **Prioritize Investment in High-Growth Revenue Categories**:
 Books & Media, Sports, and Automotive are driving the strongest revenue growth across the business. RetailCo should prioritize inventory availability, supplier partnerships, and targeted marketing campaigns within these categories to sustain growth momentum and maximize revenue opportunities.
 
-2. **Increase Engagement of High-Value Customer Segments**
+2. **Increase Engagement of High-Value Customer Segments**:
 Retail Platinum customers generate the highest overall revenue, while VIP customers purchase less frequently than expected. Introducing personalized loyalty programs, exclusive offers, and targeted retention campaigns can increase purchase frequency and customer lifetime value among these high-value segments.
 
-3. **Expand Focus on High-Margin Products**
+3. **Expand Focus on High-Margin Products**:
 Sports, Electronics, and Books & Media deliver the strongest profit margins, while products such as Incredible Metal Tuna and Practical Frozen Towels generate exceptional profitability. RetailCo should prioritize these products in merchandising, inventory planning, and promotional activities to improve overall profitability.
 
-4. **Accelerate Digital Payment Adoption and Review Refund Trends**
+4. **Accelerate Digital Payment Adoption and Review Refund Trends**:
 Digital channels account for over 80% of all transactions, demonstrating clear customer preference. RetailCo should continue investing in digital payment experiences while investigating the higher refund volume associated with Mobile Money transactions to reduce revenue leakage and improve customer satisfaction.
 
-5. **Strengthen Data Quality and Operational Monitoring**
+5. **Strengthen Data Quality and Operational Monitoring**:
 The platform successfully identified 1,398 anomalous payment records and highlighted inventory and order-processing exceptions. Management should implement automated monitoring and exception reporting to proactively detect operational issues, improve data reliability, and support faster business decision-making.
 
